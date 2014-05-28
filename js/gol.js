@@ -11,14 +11,15 @@
  */
 var debug = false;
 
-var newGame = function(rows, cols, delay, canvasDiv) {
+var newGame = function(rows, cols, delay, canvasId, playId) {
 	return {
 		matrix: [],
 		rows: rows,
 		cols: cols,
 		delay: delay,
 		loop: false,
-		canvas: document.getElementById(canvasDiv),
+		canvas: $("#" + canvasId),
+		playButton: $("#" + playId),
 		colWidth: canvas.width / cols,
 		rowHeight: canvas.height / rows,
 		init: function () {
@@ -26,13 +27,34 @@ var newGame = function(rows, cols, delay, canvasDiv) {
 				this.matrix.push(new Array(this.cols));
 				for(var j = 0; j < this.cols; j++) this.matrix[i][j] = false;
 			}
+			this.bindEvents();
 		},
-		setMatrixValues: function(x, y) {
-			if(debug) console.log(Math.floor(x/this.colWidth), ", ", Math.floor(y/this.rowHeight));
-			x = Math.floor(x/this.colWidth);
-			y = Math.floor(y/this.rowHeight);
-			if(x < this.rows && y < this.cols)
-				this.matrix[x][y] = !this.matrix[x][y];
+		bindEvents: function() {
+			this.canvas.on('click', $.proxy(this.setMatrixValues, this));
+			this.playButton.on('click', $.proxy(this.togglePlay, this));
+		},
+		setMatrixValues: function(evt) {
+			var ctx = this.canvas[0].getContext('2d');
+			var rect = this.canvas[0].getBoundingClientRect();
+			var x = Math.floor(evt.clientX - rect.left-3);
+			var y = Math.floor(evt.clientY - rect.top-3);
+			if(x >= 0 && y >= 0) {
+				if(debug) console.log(Math.floor(x/this.colWidth), ", ", Math.floor(y/this.rowHeight));
+				x = Math.floor(x/this.colWidth);
+				y = Math.floor(y/this.rowHeight);
+				if(x < this.rows && y < this.cols)
+					this.matrix[x][y] = !this.matrix[x][y];
+				this.updateCanvas();
+			}
+		},
+		togglePlay: function(evt) {
+			if(this.playButton.text() == "Play") {
+				this.startAnimation();
+				this.playButton.html("Pause");
+			} else {
+				game.pauseAnimation();
+				this.playButton.html("Play");
+			}
 		},
 		startAnimation: function() {
 			this.loop = setInterval(function() {
@@ -43,10 +65,6 @@ var newGame = function(rows, cols, delay, canvasDiv) {
 			clearInterval(this.loop);
 		},
 		nextGeneration: function() {
-			//1. Any live cell with fewer than two live neighbours dies, as if caused by under-population.
-			//2. Any live cell with two or three live neighbours lives on to the next generation.
-			//3. Any live cell with more than three live neighbours dies, as if by overcrowding.
-			//4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 			var tempMatrix = [];
 			for(var i = 0; i < this.rows; i++) {
 				tempMatrix.push(new Array(this.cols));
@@ -81,7 +99,7 @@ var newGame = function(rows, cols, delay, canvasDiv) {
 		updateCanvas: function() {
 			for(var i = 0; i < this.cols; i++) {
 				for(var j = 0; j < this.rows; j++) {
-					var ctx = this.canvas.getContext('2d');
+					var ctx = this.canvas[0].getContext('2d');
 					if(this.matrix[i][j]) ctx.fillStyle = 'black';
 					else ctx.fillStyle = 'white';
 					ctx.fillRect(i*this.colWidth, j*this.rowHeight, (i+1)*this.colWidth, (j+1)*this.rowHeight);
@@ -93,25 +111,6 @@ var newGame = function(rows, cols, delay, canvasDiv) {
 		}
 	}
 }
-var game = newGame(50, 50, 50, "canvas");
+
+var game = newGame(50, 50, 50, "canvas", "play");
 game.init();
-
-$("#" + game.canvas.id).click(function(evt) {
-	var canvas = document.getElementById("canvas");
-	var ctx = canvas.getContext('2d');
-	var rect = canvas.getBoundingClientRect();
-	var x = Math.floor(evt.clientX - rect.left-3);
-	var y = Math.floor(evt.clientY - rect.top-3);
-	if(x >= 0 && y >= 0) game.setMatrixValues(x, y);
-	game.updateCanvas();
-});
-
-$("#play").click(function() {
-	if($(this).text() == "Play") {
-		game.startAnimation();
-		$(this).html("Pause");
-	} else {
-		game.pauseAnimation();
-		$(this).html("Play");
-	}
-});
