@@ -73,17 +73,17 @@ var newGame = function(rows, cols, delay, canvasId, playId) {
 				for(var j = 0; j < this.cols; j++) tempMatrix[i][j] = this.matrix[i][j];
 			}
 
-			for(var i = 1; i < this.cols-1; i++) {
-				for(var j = 1; j < this.rows-1; j++) {
+			for(var i = 0; i < this.cols; i++) {
+				for(var j = 0; j < this.rows; j++) {
 					var livingNeighbours = 0;
-					livingNeighbours += this.matrix[i-1][j-1];
-					livingNeighbours += this.matrix[i-1][j];
-					livingNeighbours += this.matrix[i-1][j+1];
-					livingNeighbours += this.matrix[i][j-1];
-					livingNeighbours += this.matrix[i][j+1];
-					livingNeighbours += this.matrix[i+1][j-1];
-					livingNeighbours += this.matrix[i+1][j];
-					livingNeighbours += this.matrix[i+1][j+1];
+					if(this.matrix[i-1] != null && this.matrix[i-1][j-1] != null) livingNeighbours += this.matrix[i-1][j-1];
+					if(this.matrix[i-1] != null) livingNeighbours += this.matrix[i-1][j];
+					if(this.matrix[i-1] != null && this.matrix[i-1][j+1] != null) livingNeighbours += this.matrix[i-1][j+1];
+					if(this.matrix[i][j-1] != null) livingNeighbours += this.matrix[i][j-1];
+					if(this.matrix[i][j+1] != null) livingNeighbours += this.matrix[i][j+1];
+					if(this.matrix[i+1] != null && this.matrix[i+1][j-1] != null) livingNeighbours += this.matrix[i+1][j-1];
+					if(this.matrix[i+1] != null) livingNeighbours += this.matrix[i+1][j];
+					if(this.matrix[i+1] != null && this.matrix[i+1][j+1] != null) livingNeighbours += this.matrix[i+1][j+1];
 					
 					if(this.matrix[i][j] == true) {
 						if(livingNeighbours > 3 || livingNeighbours < 2)
