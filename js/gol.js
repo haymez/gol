@@ -22,12 +22,14 @@ var newGame = function(rows, cols, delay, canvasId, playId) {
 		playButton: $("#" + playId),
 		colWidth: canvas.width / cols,
 		rowHeight: canvas.height / rows,
+		currGen: 0,
 		init: function () {
 			for(var i = 0; i < this.rows; i++) {
 				this.matrix.push(new Array(this.cols));
 				for(var j = 0; j < this.cols; j++) this.matrix[i][j] = false;
 			}
 			this.bindEvents();
+			this.updateCanvas();
 		},
 		bindEvents: function() {
 			this.canvas.on('click', $.proxy(this.setMatrixValues, this));
@@ -94,6 +96,7 @@ var newGame = function(rows, cols, delay, canvasId, playId) {
 				}
 			}
 			this.matrix = tempMatrix.slice();
+			this.currGen++;
 			this.updateCanvas();
 		},
 		updateCanvas: function() {
@@ -105,6 +108,12 @@ var newGame = function(rows, cols, delay, canvasId, playId) {
 					ctx.fillRect(i*this.colWidth, j*this.rowHeight, (i+1)*this.colWidth, (j+1)*this.rowHeight);
 				}
 			}
+			var ctx = this.canvas[0].getContext('2d');
+			ctx.textAlign = 'right';
+	        ctx.font = '12pt Calibri';
+	        ctx.fillStyle = 'rgba(0,0,0, .5)';
+	        //ctx.globalAlpha = .5; //Weird stuff happens when this is uncommented..
+	        ctx.fillText("Gen: " + this.currGen, 399, 15);
 		},
 		loadMatrix: function() {
 			//Code to load a matrix in
@@ -112,5 +121,5 @@ var newGame = function(rows, cols, delay, canvasId, playId) {
 	}
 }
 
-var game = newGame(50, 50, 50, "canvas", "play");
+var game = newGame(20, 20, 50, "canvas", "play");
 game.init();
