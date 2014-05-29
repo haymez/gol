@@ -7,6 +7,7 @@ Uses JQuery and Bootstrap libraries
 ##Current Features
 * Play/Pause animation
 * Clear all cells (*Sets them to false*)
+* User can manually make cells alive/dead by clicking on canvas
 * Matrices can be inserted wherever user clicks
 * Canvas size can be changed as well as the number of rows and columns
 
