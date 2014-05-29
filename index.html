@@ -9,11 +9,16 @@
 		<h1 class='center'>Welcome to the Game of Life</h1>
 		<p class='center'>Click on the boxes below and then press play to view the generations</p>
 		<div class='center'>
-			<canvas id='canvas' class='canvas-style' width="400" height="400"></canvas>
+			<canvas id='canvas' class='canvas-style' width="500" height="500"></canvas>
 			<br>
-			<button id='play' class='btn btn-lg btn-default'>Play</button>
+			<div class='btn-group'>
+				<button id='play' class='btn btn-lg btn-success'>Play</button>
+				<button id='clear' class='btn btn-lg btn-danger'>Clear</button>
+				<button id='glider' class='btn btn-lg btn-warning'>Glider</button>
+			</div>
 		</div>
 	</body>
 
+	<script src="js/matrices.js"></script>
 	<script src="js/gol.js"></script>
 </html>
