@@ -3,17 +3,15 @@
  * Author: James Miltenberger 
  */
 
-/* newGame - Initializes a new game of life
+/* newGame - Data model for gol implimentation
  * @param  {Number} rows        - 
  * @param  {Number} cols        - 
  * @param  {Number} delay       - delay in milliseconds
  * @return {[type]}             - 
  */
-var debug = false;
-
 var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 	return {
-		matrix: [],
+		living: [],
 		rows: rows,
 		cols: cols,
 		delay: delay,
@@ -25,10 +23,6 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 		rowHeight: canvas.height / rows,
 		currGen: 0,
 		init: function () {
-			for(var i = 0; i < this.rows; i++) {
-				this.matrix.push(new Array(this.cols));
-				for(var j = 0; j < this.cols; j++) this.matrix[i][j] = false;
-			}
 			this.bindEvents();
 			this.updateCanvas();
 		},
@@ -43,7 +37,6 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 			var x = Math.floor(evt.clientX - rect.left-3);
 			var y = Math.floor(evt.clientY - rect.top-3);
 			if(x >= 0 && y >= 0) {
-				if(debug) console.log(Math.floor(x/this.colWidth), ", ", Math.floor(y/this.rowHeight));
 				x = Math.floor(x/this.colWidth);
 				y = Math.floor(y/this.rowHeight);
 				if(x < this.rows && y < this.cols)
