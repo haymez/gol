@@ -27,11 +27,11 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 			this.updateCanvas();
 		},
 		bindEvents: function() {
-			this.canvas.on('click', $.proxy(this.setMatrixValues, this));
+			this.canvas.on('click', $.proxy(this.setCellValues, this));
 			this.playButton.on('click', $.proxy(this.togglePlay, this));
 			this.clearButton.on('click', $.proxy(this.clearCanvas, this));
 		},
-		setMatrixValues: function(evt) {
+		setCellValues: function(evt) {
 			var ctx = this.canvas[0].getContext('2d');
 			var rect = this.canvas[0].getBoundingClientRect();
 			var x = Math.floor(evt.clientX - rect.left-3);
@@ -39,15 +39,26 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 			if(x >= 0 && y >= 0) {
 				x = Math.floor(x/this.colWidth);
 				y = Math.floor(y/this.rowHeight);
-				if(x < this.rows && y < this.cols)
-					this.matrix[x][y] = !this.matrix[x][y];
+				if(x < this.rows && y < this.cols) {
+					var index = this.inLivingArray({x:x, y:y}, this.living);
+					if(index > -1) {
+						this.living.splice(index, 1);
+					} else {
+						this.living.push({x:x, y:y});
+					}
+				}
 				this.updateCanvas();
 			}
 		},
-		clearCanvas: function() {
-			for(var i = 0; i < this.rows; i++) {
-				for(var j = 0; j < this.cols; j++) this.matrix[i][j] = false;
+		inLivingArray: function(obj) {
+			for(var i = 0; i < this.living.length; i++) {
+				if(obj.x == this.living[i].x && obj.y == this.living[i].y)
+					return i;
 			}
+			return -1;
+		},
+		clearCanvas: function() {
+			this.living = [];
 			this.pauseAnimation();
 			this.playButton.html("Play");
 			this.currGen = 0;
@@ -71,53 +82,83 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 			clearInterval(this.loop);
 		},
 		nextGeneration: function() {
-			var tempMatrix = [];
-			for(var i = 0; i < this.rows; i++) {
-				tempMatrix.push(new Array(this.cols));
-				for(var j = 0; j < this.cols; j++) tempMatrix[i][j] = this.matrix[i][j];
+			var tempArray = [];
+			tempArray = this.living.slice();
+			for(var i = 0; i < this.living.length; i++) {
+				var livingNeighbours = 0;
+				if(this.inLivingArray({x:this.living[i].x-1, y:this.living[i].y-1}) > -1) livingNeighbours++;
+				if(this.inLivingArray({x:this.living[i].x-1, y:this.living[i].y}) > -1) livingNeighbours++;
+				if(this.inLivingArray({x:this.living[i].x-1, y:this.living[i].y+1}) > -1) livingNeighbours++;
+				if(this.inLivingArray({x:this.living[i].x, y:this.living[i].y-1}) > -1) livingNeighbours++;
+				if(this.inLivingArray({x:this.living[i].x, y:this.living[i].y+1}) > -1) livingNeighbours++;
+				if(this.inLivingArray({x:this.living[i].x+1, y:this.living[i].y-1}) > -1) livingNeighbours++;
+				if(this.inLivingArray({x:this.living[i].x+1, y:this.living[i].y}) > -1) livingNeighbours++;
+				if(this.inLivingArray({x:this.living[i].x+1, y:this.living[i].y+1}) > -1) livingNeighbours++;
+				
 			}
 
 			for(var i = 0; i < this.cols; i++) {
 				for(var j = 0; j < this.rows; j++) {
 					var livingNeighbours = 0;
-					if(this.matrix[i-1] != null && this.matrix[i-1][j-1] != null) livingNeighbours += this.matrix[i-1][j-1];
-					if(this.matrix[i-1] != null) livingNeighbours += this.matrix[i-1][j];
-					if(this.matrix[i-1] != null && this.matrix[i-1][j+1] != null) livingNeighbours += this.matrix[i-1][j+1];
-					if(this.matrix[i][j-1] != null) livingNeighbours += this.matrix[i][j-1];
-					if(this.matrix[i][j+1] != null) livingNeighbours += this.matrix[i][j+1];
-					if(this.matrix[i+1] != null && this.matrix[i+1][j-1] != null) livingNeighbours += this.matrix[i+1][j-1];
-					if(this.matrix[i+1] != null) livingNeighbours += this.matrix[i+1][j];
-					if(this.matrix[i+1] != null && this.matrix[i+1][j+1] != null) livingNeighbours += this.matrix[i+1][j+1];
+					if(this.inLivingArray({x:i-1, y:j-1}) > -1) livingNeighbours++;
+					if(this.inLivingArray({x:i-1, y:j}) > -1) livingNeighbours++;
+					if(this.inLivingArray({x:i-1, y:j+1}) > -1) livingNeighbours++;
+					if(this.inLivingArray({x:i, y:j-1}) > -1) livingNeighbours++;
+					if(this.inLivingArray({x:i, y:j+1}) > -1) livingNeighbours++;
+					if(this.inLivingArray({x:i+1, y:j-1}) > -1) livingNeighbours++;
+					if(this.inLivingArray({x:i+1, y:j}) > -1) livingNeighbours++;
+					if(this.inLivingArray({x:i+1, y:j+1}) > -1) livingNeighbours++;
 					
-					if(this.matrix[i][j] == true) {
-						if(livingNeighbours > 3 || livingNeighbours < 2)
-							tempMatrix[i][j] = false;
-					}
-					else {
-						if(livingNeighbours == 3)
-							tempMatrix[i][j] = true;
-					}
 				}
 			}
-			this.matrix = tempMatrix.slice();
+
+			// for(var i = 0; i < this.cols; i++) {
+			// 	for(var j = 0; j < this.rows; j++) {
+			// 		var livingNeighbours = 0;
+			// 		if(this.matrix[i-1] != null && this.matrix[i-1][j-1] != null) livingNeighbours += this.matrix[i-1][j-1];
+			// 		if(this.matrix[i-1] != null) livingNeighbours += this.matrix[i-1][j];
+			// 		if(this.matrix[i-1] != null && this.matrix[i-1][j+1] != null) livingNeighbours += this.matrix[i-1][j+1];
+			// 		if(this.matrix[i][j-1] != null) livingNeighbours += this.matrix[i][j-1];
+			// 		if(this.matrix[i][j+1] != null) livingNeighbours += this.matrix[i][j+1];
+			// 		if(this.matrix[i+1] != null && this.matrix[i+1][j-1] != null) livingNeighbours += this.matrix[i+1][j-1];
+			// 		if(this.matrix[i+1] != null) livingNeighbours += this.matrix[i+1][j];
+			// 		if(this.matrix[i+1] != null && this.matrix[i+1][j+1] != null) livingNeighbours += this.matrix[i+1][j+1];
+					
+			// 		if(this.matrix[i][j] == true) {
+			// 			if(livingNeighbours > 3 || livingNeighbours < 2)
+			// 				tempMatrix[i][j] = false;
+			// 		}
+			// 		else {
+			// 			if(livingNeighbours == 3)
+			// 				tempMatrix[i][j] = true;
+			// 		}
+			// 	}
+			// }
+			this.living = tempArray.slice();
 			this.currGen++;
 			this.updateCanvas();
 		},
 		updateCanvas: function() {
-			for(var i = 0; i < this.cols; i++) {
-				for(var j = 0; j < this.rows; j++) {
-					var ctx = this.canvas[0].getContext('2d');
-					if(this.matrix[i][j]) ctx.fillStyle = 'black';
-					else ctx.fillStyle = 'white';
-					ctx.fillRect(Math.round(i*this.colWidth), Math.round(j*this.rowHeight), Math.round((i+1)*this.colWidth), Math.round((j+1)*this.rowHeight));
-				}
-			}
-			var ctx = this.canvas[0].getContext('2d');
-			ctx.textAlign = 'right';
-	        ctx.font = '12pt Calibri';
-	        ctx.fillStyle = 'rgba(0,0,0, .5)';
-	        //ctx.globalAlpha = .5; //Weird stuff happens when this is uncommented..
-	        ctx.fillText("Gen: " + this.currGen, this.canvas[0].width-1, 15);
+			// for(var i = 0; i < this.cols; i++) {
+			// 	for(var j = 0; j < this.rows; j++) {
+			// 		var ctx = this.canvas[0].getContext('2d');
+			// 		if(this.matrix[i][j]) ctx.fillStyle = 'black';
+			// 		else ctx.fillStyle = 'white';
+			// 		ctx.fillRect(Math.round(i*this.colWidth), Math.round(j*this.rowHeight), Math.round((i+1)*this.colWidth), Math.round((j+1)*this.rowHeight));
+			// 	}
+			// }
+			
+			// for(var i = 0; i < this.living.length; i++) {
+			// 	var ctx = this.canvas[0].getContext('2d');
+			// 	ctx.fillStyle = 'black';
+			// 	ctx.fillRect(); //FINISH THIS
+			// }
+			// var ctx = this.canvas[0].getContext('2d');
+			// ctx.textAlign = 'right';
+	  //       ctx.font = '12pt Calibri';
+	  //       ctx.fillStyle = 'rgba(0,0,0, .5)';
+	  //       //ctx.globalAlpha = .5; //Weird stuff happens when this is uncommented..
+	  //       ctx.fillText("Gen: " + this.currGen, this.canvas[0].width-1, 15);
 		},
 		insertListener: function(subMatrix) {
 			this.canvas.on("click.insert", $.proxy(function(evt) {
