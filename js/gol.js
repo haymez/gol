@@ -40,7 +40,7 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 				x = Math.floor(x/this.colWidth);
 				y = Math.floor(y/this.rowHeight);
 				if(x < this.rows && y < this.cols) {
-					var index = this.inLivingArray({x:x, y:y}, this.living);
+					var index = this.inArray({x:x, y:y}, this.living);
 					if(index > -1) {
 						this.living.splice(index, 1);
 					} else {
@@ -50,9 +50,9 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 				this.updateCanvas();
 			}
 		},
-		inLivingArray: function(obj) {
-			for(var i = 0; i < this.living.length; i++) {
-				if(obj.x == this.living[i].x && obj.y == this.living[i].y)
+		inArray: function(obj, arr) {
+			for(var i = 0; i < arr.length; i++) {
+				if(obj.x == arr[i].x && obj.y == arr[i].y)
 					return i;
 			}
 			return -1;
@@ -82,83 +82,108 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 			clearInterval(this.loop);
 		},
 		nextGeneration: function() {
+			var checkedAlready = [];
 			var tempArray = [];
-			tempArray = this.living.slice();
 			for(var i = 0; i < this.living.length; i++) {
-				var livingNeighbours = 0;
-				if(this.inLivingArray({x:this.living[i].x-1, y:this.living[i].y-1}) > -1) livingNeighbours++;
-				if(this.inLivingArray({x:this.living[i].x-1, y:this.living[i].y}) > -1) livingNeighbours++;
-				if(this.inLivingArray({x:this.living[i].x-1, y:this.living[i].y+1}) > -1) livingNeighbours++;
-				if(this.inLivingArray({x:this.living[i].x, y:this.living[i].y-1}) > -1) livingNeighbours++;
-				if(this.inLivingArray({x:this.living[i].x, y:this.living[i].y+1}) > -1) livingNeighbours++;
-				if(this.inLivingArray({x:this.living[i].x+1, y:this.living[i].y-1}) > -1) livingNeighbours++;
-				if(this.inLivingArray({x:this.living[i].x+1, y:this.living[i].y}) > -1) livingNeighbours++;
-				if(this.inLivingArray({x:this.living[i].x+1, y:this.living[i].y+1}) > -1) livingNeighbours++;
+				var curr = this.living[i];
+				var above = {x:curr.x, y:curr.y+1};
+				var below = {x:curr.x, y:curr.y-1};
+				var left = {x:curr.x-1, y:curr.y};
+				var right = {x:curr.x+1, y:curr.y};
+				var topRight = {x:curr.x+1, y:curr.y+1};
+				var topLeft = {x:curr.x-1, y:curr.y+1};
+				var bottomRight = {x:curr.x+1, y:curr.y-1};
+				var bottomLeft = {x:curr.x-1, y:curr.y-1};
 				
-			}
-
-			for(var i = 0; i < this.cols; i++) {
-				for(var j = 0; j < this.rows; j++) {
-					var livingNeighbours = 0;
-					if(this.inLivingArray({x:i-1, y:j-1}) > -1) livingNeighbours++;
-					if(this.inLivingArray({x:i-1, y:j}) > -1) livingNeighbours++;
-					if(this.inLivingArray({x:i-1, y:j+1}) > -1) livingNeighbours++;
-					if(this.inLivingArray({x:i, y:j-1}) > -1) livingNeighbours++;
-					if(this.inLivingArray({x:i, y:j+1}) > -1) livingNeighbours++;
-					if(this.inLivingArray({x:i+1, y:j-1}) > -1) livingNeighbours++;
-					if(this.inLivingArray({x:i+1, y:j}) > -1) livingNeighbours++;
-					if(this.inLivingArray({x:i+1, y:j+1}) > -1) livingNeighbours++;
-					
+				if(this.inArray(curr, checkedAlready) == -1) {
+					if(this.liveToNextGen(this.findNeighbours(curr), this.inArray(curr, this.living))) {
+						if(this.inArray(curr, tempArray) == -1) tempArray.push(curr);
+					}
 				}
+				if(this.inArray(above, checkedAlready) == -1) {
+					if(this.liveToNextGen(this.findNeighbours(above), this.inArray(above, this.living))) {
+						if(this.inArray(above, tempArray) == -1) tempArray.push(above);
+					}
+				}
+				if(this.inArray(below, checkedAlready) == -1) {
+					if(this.liveToNextGen(this.findNeighbours(below), this.inArray(below, this.living))) {
+						if(this.inArray(below, tempArray) == -1) tempArray.push(below);
+					}
+				}
+				if(this.inArray(left, checkedAlready) == -1) {
+					if(this.liveToNextGen(this.findNeighbours(left), this.inArray(left, this.living))) {
+						if(this.inArray(left, tempArray) == -1) tempArray.push(left);
+					}
+				}
+				if(this.inArray(right, checkedAlready) == -1) {
+					if(this.liveToNextGen(this.findNeighbours(right), this.inArray(right, this.living))) {
+						if(this.inArray(right, tempArray) == -1) tempArray.push(right);
+					}
+				}
+				if(this.inArray(topRight, checkedAlready) == -1) {
+					if(this.liveToNextGen(this.findNeighbours(topRight), this.inArray(topRight, this.living))) {
+						if(this.inArray(topRight, tempArray) == -1) tempArray.push(topRight);
+					}
+				}
+				if(this.inArray(topLeft, checkedAlready) == -1) {
+					if(this.liveToNextGen(this.findNeighbours(topLeft), this.inArray(topLeft, this.living))) {
+						if(this.inArray(topLeft, tempArray) == -1) tempArray.push(topLeft);
+					}
+				}
+				if(this.inArray(bottomRight, checkedAlready) == -1) {
+					if(this.liveToNextGen(this.findNeighbours(bottomRight), this.inArray(bottomRight, this.living))) {
+						if(this.inArray(bottomRight, tempArray) == -1) tempArray.push(bottomRight);
+					}
+				}
+				if(this.inArray(bottomLeft, checkedAlready) == -1) {
+					if(this.liveToNextGen(this.findNeighbours(bottomLeft), this.inArray(bottomLeft, this.living))) {
+						if(this.inArray(bottomLeft, tempArray) == -1) tempArray.push(bottomLeft);
+					}
+				}
+				checkedAlready.push(curr, above, below, left, right, topLeft, topRight, bottomLeft, bottomRight);
 			}
-
-			// for(var i = 0; i < this.cols; i++) {
-			// 	for(var j = 0; j < this.rows; j++) {
-			// 		var livingNeighbours = 0;
-			// 		if(this.matrix[i-1] != null && this.matrix[i-1][j-1] != null) livingNeighbours += this.matrix[i-1][j-1];
-			// 		if(this.matrix[i-1] != null) livingNeighbours += this.matrix[i-1][j];
-			// 		if(this.matrix[i-1] != null && this.matrix[i-1][j+1] != null) livingNeighbours += this.matrix[i-1][j+1];
-			// 		if(this.matrix[i][j-1] != null) livingNeighbours += this.matrix[i][j-1];
-			// 		if(this.matrix[i][j+1] != null) livingNeighbours += this.matrix[i][j+1];
-			// 		if(this.matrix[i+1] != null && this.matrix[i+1][j-1] != null) livingNeighbours += this.matrix[i+1][j-1];
-			// 		if(this.matrix[i+1] != null) livingNeighbours += this.matrix[i+1][j];
-			// 		if(this.matrix[i+1] != null && this.matrix[i+1][j+1] != null) livingNeighbours += this.matrix[i+1][j+1];
-					
-			// 		if(this.matrix[i][j] == true) {
-			// 			if(livingNeighbours > 3 || livingNeighbours < 2)
-			// 				tempMatrix[i][j] = false;
-			// 		}
-			// 		else {
-			// 			if(livingNeighbours == 3)
-			// 				tempMatrix[i][j] = true;
-			// 		}
-			// 	}
-			// }
 			this.living = tempArray.slice();
 			this.currGen++;
 			this.updateCanvas();
 		},
+		liveToNextGen: function(neighbours, index) {
+			if(index > -1) {
+				if(neighbours > 3 || neighbours < 2) {
+					return false;
+				}
+				else return true;
+			}
+			else if(neighbours == 3) return true;
+			return false;
+		},
+		findNeighbours: function(coor) {
+			var livingNeighbours = 0;
+			if(this.inArray({x:coor.x-1, y:coor.y-1}, this.living) > -1) livingNeighbours++;
+			if(this.inArray({x:coor.x-1, y:coor.y}, this.living) > -1) livingNeighbours++;
+			if(this.inArray({x:coor.x-1, y:coor.y+1}, this.living) > -1) livingNeighbours++;
+			if(this.inArray({x:coor.x, y:coor.y-1}, this.living) > -1) livingNeighbours++;
+			if(this.inArray({x:coor.x, y:coor.y+1}, this.living) > -1) livingNeighbours++;
+			if(this.inArray({x:coor.x+1, y:coor.y-1}, this.living) > -1) livingNeighbours++;
+			if(this.inArray({x:coor.x+1, y:coor.y}, this.living) > -1) livingNeighbours++;
+			if(this.inArray({x:coor.x+1, y:coor.y+1}, this.living) > -1) livingNeighbours++;
+			return livingNeighbours;
+		},
 		updateCanvas: function() {
-			// for(var i = 0; i < this.cols; i++) {
-			// 	for(var j = 0; j < this.rows; j++) {
-			// 		var ctx = this.canvas[0].getContext('2d');
-			// 		if(this.matrix[i][j]) ctx.fillStyle = 'black';
-			// 		else ctx.fillStyle = 'white';
-			// 		ctx.fillRect(Math.round(i*this.colWidth), Math.round(j*this.rowHeight), Math.round((i+1)*this.colWidth), Math.round((j+1)*this.rowHeight));
-			// 	}
-			// }
-			
-			// for(var i = 0; i < this.living.length; i++) {
-			// 	var ctx = this.canvas[0].getContext('2d');
-			// 	ctx.fillStyle = 'black';
-			// 	ctx.fillRect(); //FINISH THIS
-			// }
-			// var ctx = this.canvas[0].getContext('2d');
-			// ctx.textAlign = 'right';
-	  //       ctx.font = '12pt Calibri';
-	  //       ctx.fillStyle = 'rgba(0,0,0, .5)';
-	  //       //ctx.globalAlpha = .5; //Weird stuff happens when this is uncommented..
-	  //       ctx.fillText("Gen: " + this.currGen, this.canvas[0].width-1, 15);
+			var ctx = this.canvas[0].getContext('2d');
+			ctx.clearRect(0, 0, this.canvas[0].width, this.canvas[0].height);
+			for(var i = 0; i < this.living.length; i++) {
+				var ctx = this.canvas[0].getContext('2d');
+				var x = this.living[i].x;
+				var y = this.living[i].y;
+				ctx.fillStyle = 'black';
+				ctx.fillRect(Math.floor(x*this.colWidth), Math.floor(y*this.rowHeight), Math.round(this.colWidth), Math.round(this.rowHeight));
+			}
+			var ctx = this.canvas[0].getContext('2d');
+			ctx.textAlign = 'right';
+	        ctx.font = '12pt Calibri';
+	        ctx.fillStyle = 'rgba(0,0,0, .5)';
+	        //ctx.globalAlpha = .5; //Weird stuff happens when this is uncommented..
+	        ctx.fillText("Gen: " + this.currGen, this.canvas[0].width-1, 15);
 		},
 		insertListener: function(subMatrix) {
 			this.canvas.on("click.insert", $.proxy(function(evt) {
@@ -167,19 +192,18 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 				var Y = Math.floor(evt.clientY - rect.top - 3);
 				X = Math.floor(X/this.colWidth);
 				Y = Math.floor(Y/this.rowHeight);
+				if(this.inArray({x:X,y:Y}, this.living) > -1)
+					this.living.splice(this.inArray({x:X,y:Y}, this.living), 1)
 				this.loadMatrix(subMatrix, {x: X, y: Y})
 				this.canvas.off(".insert");
 			}, this));
 		},
 		loadMatrix: function(subMatrix, offset) {
-			// var xOffset = this.matrix.length - subMatrix.length;
-			// var yOffset = this.matrix[0].length - subMatrix[0].length;
-			for(var i = offset.x; i < (subMatrix.length + offset.x); i++) {
-				for (var j = offset.y; j < (subMatrix[0].length + offset.y); j++) {
-					if(this.matrix[i] != null && this.matrix[i][j] != null) {
-						this.matrix[i][j] = subMatrix[i - offset.x][j - offset.y];
-					}
-				}
+			for(var i = 0; i < subMatrix.length; i++) {
+				var x = subMatrix[i].x+offset.x;
+				var y = subMatrix[i].y+offset.y;
+				if(this.inArray({x:x, y:y}, this.living == -1))
+					this.living.push({x:x, y:y});
 			}
 			this.updateCanvas();
 		}
