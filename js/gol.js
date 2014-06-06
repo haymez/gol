@@ -85,62 +85,45 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 			var checkedAlready = [];
 			var tempArray = [];
 			for(var i = 0; i < this.living.length; i++) {
-				var curr = this.living[i];
-				var above = {x:curr.x, y:curr.y+1};
-				var below = {x:curr.x, y:curr.y-1};
-				var left = {x:curr.x-1, y:curr.y};
-				var right = {x:curr.x+1, y:curr.y};
-				var topRight = {x:curr.x+1, y:curr.y+1};
-				var topLeft = {x:curr.x-1, y:curr.y+1};
-				var bottomRight = {x:curr.x+1, y:curr.y-1};
-				var bottomLeft = {x:curr.x-1, y:curr.y-1};
-				
-				if(this.inArray(curr, checkedAlready) == -1) {
+				if(this.living[i].x > 0 && this.living[i].x < this.cols
+				&& this.living[i].y > 0 && this.living[i].y < this.rows) {
+					var curr = this.living[i];
+					var above = {x:curr.x, y:curr.y+1};
+					var below = {x:curr.x, y:curr.y-1};
+					var left = {x:curr.x-1, y:curr.y};
+					var right = {x:curr.x+1, y:curr.y};
+					var topRight = {x:curr.x+1, y:curr.y+1};
+					var topLeft = {x:curr.x-1, y:curr.y+1};
+					var bottomRight = {x:curr.x+1, y:curr.y-1};
+					var bottomLeft = {x:curr.x-1, y:curr.y-1};
 					if(this.liveToNextGen(this.findNeighbours(curr), this.inArray(curr, this.living))) {
 						if(this.inArray(curr, tempArray) == -1) tempArray.push(curr);
 					}
-				}
-				if(this.inArray(above, checkedAlready) == -1) {
 					if(this.liveToNextGen(this.findNeighbours(above), this.inArray(above, this.living))) {
 						if(this.inArray(above, tempArray) == -1) tempArray.push(above);
 					}
-				}
-				if(this.inArray(below, checkedAlready) == -1) {
 					if(this.liveToNextGen(this.findNeighbours(below), this.inArray(below, this.living))) {
 						if(this.inArray(below, tempArray) == -1) tempArray.push(below);
 					}
-				}
-				if(this.inArray(left, checkedAlready) == -1) {
 					if(this.liveToNextGen(this.findNeighbours(left), this.inArray(left, this.living))) {
 						if(this.inArray(left, tempArray) == -1) tempArray.push(left);
 					}
-				}
-				if(this.inArray(right, checkedAlready) == -1) {
 					if(this.liveToNextGen(this.findNeighbours(right), this.inArray(right, this.living))) {
 						if(this.inArray(right, tempArray) == -1) tempArray.push(right);
 					}
-				}
-				if(this.inArray(topRight, checkedAlready) == -1) {
 					if(this.liveToNextGen(this.findNeighbours(topRight), this.inArray(topRight, this.living))) {
 						if(this.inArray(topRight, tempArray) == -1) tempArray.push(topRight);
 					}
-				}
-				if(this.inArray(topLeft, checkedAlready) == -1) {
 					if(this.liveToNextGen(this.findNeighbours(topLeft), this.inArray(topLeft, this.living))) {
 						if(this.inArray(topLeft, tempArray) == -1) tempArray.push(topLeft);
 					}
-				}
-				if(this.inArray(bottomRight, checkedAlready) == -1) {
 					if(this.liveToNextGen(this.findNeighbours(bottomRight), this.inArray(bottomRight, this.living))) {
 						if(this.inArray(bottomRight, tempArray) == -1) tempArray.push(bottomRight);
 					}
-				}
-				if(this.inArray(bottomLeft, checkedAlready) == -1) {
 					if(this.liveToNextGen(this.findNeighbours(bottomLeft), this.inArray(bottomLeft, this.living))) {
 						if(this.inArray(bottomLeft, tempArray) == -1) tempArray.push(bottomLeft);
 					}
 				}
-				checkedAlready.push(curr, above, below, left, right, topLeft, topRight, bottomLeft, bottomRight);
 			}
 			this.living = tempArray.slice();
 			this.currGen++;
@@ -183,7 +166,7 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 	        ctx.font = '12pt Calibri';
 	        ctx.fillStyle = 'rgba(0,0,0, .5)';
 	        //ctx.globalAlpha = .5; //Weird stuff happens when this is uncommented..
-	        ctx.fillText("Gen: " + this.currGen, this.canvas[0].width-1, 15);
+	        ctx.fillText("Gen: " + this.currGen + ", Living: " + this.living.length, this.canvas[0].width-1, 15);
 		},
 		insertListener: function(subMatrix) {
 			this.canvas.on("click.insert", $.proxy(function(evt) {
@@ -210,7 +193,7 @@ var newGame = function(rows, cols, delay, canvasId, playId, clearId) {
 	}
 }
 
-var game = newGame(100, 100, 30, "canvas", "play", "clear");
+var game = newGame(100, 200, 0, "canvas", "play", "clear");
 game.init();
 
 $("#glider").click(function() {
