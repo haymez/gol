@@ -1,5 +1,5 @@
 /*
- * This file contains all the JavaScript necessary to run this game of life app
+ * This file contains all the JavaScript necessary to run this game of life app.
  * Author: James Miltenberger 
  */
 
